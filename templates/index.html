@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>microGPT Training Visualizer</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hyperparams {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .hyperparams h2 {
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .param-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .param-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .param-item label {
+            font-size: 13px;
+            font-weight: bold;
+            opacity: 0.9;
+        }
+
+        .param-item input {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .param-item input:focus {
+            outline: none;
+            border-color: #00c6ff;
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .param-item small {
+            font-size: 11px;
+            opacity: 0.7;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, #ff6b6b 0%, #c92a2a 100%);
+        }
+
+        .btn-stop:hover:not(:disabled) {
+            background: linear-gradient(135deg, #ff5252 0%, #b71c1c 100%);
+        }
+
+        .status {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .status-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+
+        .status-label {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .status-value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .samples-list {
+            max-height: 300px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sample-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 15px;
+            border-radius: 8px;
+            border-left: 3px solid #00c6ff;
+        }
+
+        .sample-step {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
+
+        .sample-text {
+            font-size: 16px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+
+        .attention-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(30px, 1fr));
+            gap: 2px;
+            max-height: 300px;
+            overflow: auto;
+        }
+
+        .attention-cell {
+            aspect-ratio: 1;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .optimizer-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00c6ff;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 microGPT Training Dashboard</h1>
+
+        <div class="hyperparams">
+            <h2>⚙️ Training Configuration</h2>
+            <div class="param-grid">
+                <div class="param-item">
+                    <label for="num_steps">Training Steps</label>
+                    <input type="number" id="num_steps" value="5000" min="100" max="50000">
+                    <small>More steps = better training</small>
+                </div>
+                <div class="param-item">
+                    <label for="n_layer">Number of Layers</label>
+                    <input type="number" id="n_layer" value="2" min="1" max="8">
+                    <small>Model depth (1-4 recommended)</small>
+                </div>
+                <div class="param-item">
+                    <label for="n_embd">Embedding Dimension</label>
+                    <input type="number" id="n_embd" value="32" min="8" max="128" step="8">
+                    <small>Model width (32-64 good balance)</small>
+                </div>
+                <div class="param-item">
+                    <label for="n_head">Attention Heads</label>
+                    <input type="number" id="n_head" value="4" min="1" max="8">
+                    <small>Must divide embedding dim evenly</small>
+                </div>
+                <div class="param-item">
+                    <label for="block_size">Context Length</label>
+                    <input type="number" id="block_size" value="16" min="8" max="32">
+                    <small>Max sequence length</small>
+                </div>
+                <div class="param-item">
+                    <label for="learning_rate">Learning Rate</label>
+                    <input type="number" id="learning_rate" value="0.01" min="0.0001" max="0.1" step="0.001">
+                    <small>Typical: 0.001-0.01</small>
+                </div>
+                <div class="param-item">
+                    <label for="temperature">Temperature</label>
+                    <input type="number" id="temperature" value="0.7" min="0.1" max="2.0" step="0.1">
+                    <small>Generation creativity (0.5-1.0)</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div style="display: flex; gap: 10px;">
+                <button class="btn" id="startBtn" onclick="startTraining()">Start Training</button>
+                <button class="btn btn-stop" id="stopBtn" onclick="stopTraining()" disabled>Stop Training</button>
+            </div>
+            <div class="status">
+                <div class="status-item">
+                    <div class="status-label">Step</div>
+                    <div class="status-value" id="currentStep">0</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">Loss</div>
+                    <div class="status-value" id="currentLoss">-</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">Status</div>
+                    <div class="status-value" id="trainingStatus">Ready</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard">
+            <div class="card">
+                <h2>📉 Loss Curve</h2>
+                <div class="chart-container">
+                    <canvas id="lossChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📊 Optimizer Statistics</h2>
+                <div class="optimizer-stats">
+                    <div class="stat-box">
+                        <div class="stat-label">Learning Rate</div>
+                        <div class="stat-value" id="learningRate">-</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Gradient Norm</div>
+                        <div class="stat-value" id="gradNorm">-</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Vocab Size</div>
+                        <div class="stat-value" id="vocabSize">-</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Documents</div>
+                        <div class="stat-value" id="numDocs">-</div>
+                    </div>
+                </div>
+                <div style="margin-top: 20px;">
+                    <h3 style="font-size: 14px; margin-bottom: 10px;">Current Training Example:</h3>
+                    <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; font-family: 'Courier New', monospace;" id="currentDoc">-</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>✨ Generated Samples</h2>
+                <div class="samples-list" id="samplesList">
+                    <div style="text-align: center; opacity: 0.5;">No samples yet...</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🎯 Attention Heatmap</h2>
+                <div id="attentionViz" style="max-height: 300px; overflow: auto;">
+                    <div style="text-align: center; opacity: 0.5; padding: 50px 0;">Waiting for attention data...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const lossData = {
+            labels: [],
+            datasets: [{
+                label: 'Training Loss',
+                data: [],
+                borderColor: '#00c6ff',
+                backgroundColor: 'rgba(0, 198, 255, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        };
+
+        const lossChart = new Chart(document.getElementById('lossChart'), {
+            type: 'line',
+            data: lossData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#fff' }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        ticks: { color: '#fff' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                    },
+                    x: {
+                        ticks: { color: '#fff' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                    }
+                }
+            }
+        });
+
+        let eventSource;
+        const samples = [];
+
+        function startTraining() {
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            document.getElementById('trainingStatus').textContent = 'Training...';
+
+            const params = new URLSearchParams({
+                num_steps: document.getElementById('num_steps').value,
+                n_layer: document.getElementById('n_layer').value,
+                n_embd: document.getElementById('n_embd').value,
+                n_head: document.getElementById('n_head').value,
+                block_size: document.getElementById('block_size').value,
+                learning_rate: document.getElementById('learning_rate').value,
+                temperature: document.getElementById('temperature').value
+            });
+
+            fetch('/start_training')
+                .then(response => response.json())
+                .then(() => {
+                    eventSource = new EventSource('/stream?' + params.toString());
+
+                    eventSource.onmessage = function(event) {
+                        const data = JSON.parse(event.data);
+
+                        if (data.type === 'init') {
+                            document.getElementById('vocabSize').textContent = data.vocab_size;
+                            document.getElementById('numDocs').textContent = data.num_docs;
+                        }
+                        else if (data.type === 'step') {
+                            document.getElementById('currentStep').textContent = data.step;
+                            document.getElementById('currentLoss').textContent = data.loss.toFixed(4);
+                            document.getElementById('learningRate').textContent = data.lr.toFixed(6);
+                            document.getElementById('gradNorm').textContent = data.grad_norm.toFixed(2);
+                            document.getElementById('currentDoc').textContent = data.doc;
+
+                            lossData.labels.push(data.step);
+                            lossData.datasets[0].data.push(data.loss);
+
+                            if (lossData.labels.length > 200) {
+                                lossData.labels.shift();
+                                lossData.datasets[0].data.shift();
+                            }
+
+                            lossChart.update('none');
+
+                            if (data.sample) {
+                                samples.unshift({step: data.step, text: data.sample});
+                                if (samples.length > 10) samples.pop();
+                                updateSamples();
+                            }
+
+                            if (data.attention) {
+                                updateAttention(data.attention);
+                            }
+                        }
+                        else if (data.type === 'complete') {
+                            document.getElementById('trainingStatus').textContent = 'Complete!';
+                            document.getElementById('startBtn').disabled = false;
+                            document.getElementById('stopBtn').disabled = true;
+                            eventSource.close();
+                        }
+                    };
+                });
+        }
+
+        function stopTraining() {
+            if (eventSource) {
+                eventSource.close();
+                document.getElementById('trainingStatus').textContent = 'Stopped';
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = true;
+            }
+        }
+
+        function updateSamples() {
+            const samplesList = document.getElementById('samplesList');
+            samplesList.innerHTML = samples.map(s => `
+                <div class="sample-item">
+                    <div class="sample-step">Step ${s.step}</div>
+                    <div class="sample-text">${s.text || '(empty)'}</div>
+                </div>
+            `).join('');
+        }
+
+        function updateAttention(attnWeights) {
+            const container = document.getElementById('attentionViz');
+            const maxLen = Math.max(...attnWeights.map(row => row.length));
+
+            const html = attnWeights.map((row, i) => {
+                return `<div style="display: flex; gap: 2px; margin-bottom: 2px;">
+                    ${row.map(weight => {
+                        const intensity = Math.min(255, Math.floor(weight * 255));
+                        const color = `rgb(${intensity}, ${Math.floor(intensity * 0.7)}, 255)`;
+                        return `<div class="attention-cell" style="background: ${color}; flex: 1;" title="${weight.toFixed(3)}"></div>`;
+                    }).join('')}
+                </div>`;
+            }).join('');
+
+            container.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
