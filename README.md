@@ -1,3 +1,9 @@
+<div align="center">
+  <img src="docs/images/hero-banner.svg" alt="microGPT - Educational GPT Implementation" width="100%"/>
+</div>
+
+<br/>
+
 # microGPT - Educational GPT Implementation
 
 Two complete implementations of GPT for learning and comparison, organized in separate folders:

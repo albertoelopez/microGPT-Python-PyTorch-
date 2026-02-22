@@ -1,0 +1,101 @@
+<svg width="1200" height="400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e3a8a;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#4c1d95;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7e22ce;stop-opacity:1" />
+    </linearGradient>
+
+    <linearGradient id="text-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#c084fc;stop-opacity:1" />
+    </linearGradient>
+
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="400" fill="url(#bg-gradient)"/>
+
+  <!-- Decorative circles -->
+  <circle cx="100" cy="80" r="120" fill="#4c1d95" opacity="0.2"/>
+  <circle cx="1100" cy="320" r="150" fill="#7e22ce" opacity="0.2"/>
+  <circle cx="900" cy="100" r="80" fill="#60a5fa" opacity="0.15"/>
+
+  <!-- Neural network decoration (left side) -->
+  <g opacity="0.3">
+    <circle cx="150" cy="150" r="6" fill="#60a5fa"/>
+    <circle cx="200" cy="120" r="6" fill="#60a5fa"/>
+    <circle cx="200" cy="180" r="6" fill="#60a5fa"/>
+    <circle cx="250" cy="150" r="6" fill="#c084fc"/>
+    <line x1="150" y1="150" x2="200" y2="120" stroke="#60a5fa" stroke-width="2"/>
+    <line x1="150" y1="150" x2="200" y2="180" stroke="#60a5fa" stroke-width="2"/>
+    <line x1="200" y1="120" x2="250" y2="150" stroke="#60a5fa" stroke-width="2"/>
+    <line x1="200" y1="180" x2="250" y2="150" stroke="#60a5fa" stroke-width="2"/>
+  </g>
+
+  <!-- Neural network decoration (right side) -->
+  <g opacity="0.3">
+    <circle cx="1050" cy="250" r="6" fill="#c084fc"/>
+    <circle cx="1000" cy="220" r="6" fill="#c084fc"/>
+    <circle cx="1000" cy="280" r="6" fill="#c084fc"/>
+    <circle cx="950" cy="250" r="6" fill="#60a5fa"/>
+    <line x1="1050" y1="250" x2="1000" y2="220" stroke="#c084fc" stroke-width="2"/>
+    <line x1="1050" y1="250" x2="1000" y2="280" stroke="#c084fc" stroke-width="2"/>
+    <line x1="1000" y1="220" x2="950" y2="250" stroke="#c084fc" stroke-width="2"/>
+    <line x1="1000" y1="280" x2="950" y2="250" stroke="#c084fc" stroke-width="2"/>
+  </g>
+
+  <!-- Sparkles -->
+  <g opacity="0.6">
+    <path d="M 800 60 L 805 70 L 810 60 L 805 50 Z" fill="#ffffff"/>
+    <path d="M 350 340 L 355 350 L 360 340 L 355 330 Z" fill="#ffffff"/>
+    <path d="M 1050 120 L 1055 130 L 1060 120 L 1055 110 Z" fill="#ffffff"/>
+  </g>
+
+  <!-- Main Title -->
+  <text x="600" y="160" font-family="Arial, sans-serif" font-size="84" font-weight="bold" fill="url(#text-gradient)" text-anchor="middle" filter="url(#glow)">
+    microGPT
+  </text>
+
+  <!-- Tagline -->
+  <text x="600" y="210" font-family="Arial, sans-serif" font-size="24" fill="#e0e7ff" text-anchor="middle" opacity="0.9">
+    Educational GPT Implementation - Learn AI from First Principles
+  </text>
+
+  <!-- Feature Badges -->
+  <g transform="translate(280, 260)">
+    <!-- Pure Python Badge -->
+    <rect x="0" y="0" width="150" height="40" rx="20" fill="#3b82f6" opacity="0.9"/>
+    <text x="75" y="26" font-family="Arial, sans-serif" font-size="16" font-weight="600" fill="#ffffff" text-anchor="middle">
+      🐍 Pure Python
+    </text>
+  </g>
+
+  <g transform="translate(450, 260)">
+    <!-- PyTorch GPU Badge -->
+    <rect x="0" y="0" width="160" height="40" rx="20" fill="#8b5cf6" opacity="0.9"/>
+    <text x="80" y="26" font-family="Arial, sans-serif" font-size="16" font-weight="600" fill="#ffffff" text-anchor="middle">
+      ⚡ PyTorch GPU
+    </text>
+  </g>
+
+  <g transform="translate(630, 260)">
+    <!-- Web Dashboard Badge -->
+    <rect x="0" y="0" width="180" height="40" rx="20" fill="#06b6d4" opacity="0.9"/>
+    <text x="90" y="26" font-family="Arial, sans-serif" font-size="16" font-weight="600" fill="#ffffff" text-anchor="middle">
+      📊 Web Dashboard
+    </text>
+  </g>
+
+  <!-- Subtitle -->
+  <text x="600" y="345" font-family="Arial, sans-serif" font-size="18" fill="#cbd5e1" text-anchor="middle" opacity="0.8">
+    Compare CPU vs GPU • Visualize Training • Learn Transformers
+  </text>
+</svg>
