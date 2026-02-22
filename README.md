@@ -1,8 +1,33 @@
 # microGPT - Educational GPT Implementation
 
-Two complete implementations of GPT for learning and comparison:
+Two complete implementations of GPT for learning and comparison, organized in separate folders:
 
-## 🐍 Pure Python Version (Original)
+## 📁 Repository Structure
+
+```
+microGPT/
+├── python-cpu/          # Pure Python implementation (CPU-only)
+│   ├── microgpt.py      # Core implementation
+│   ├── app.py           # Flask dashboard
+│   └── templates/       # Web UI
+│       └── index.html
+│
+├── pytorch-gpu/         # PyTorch implementation (GPU-accelerated)
+│   ├── microgpt_pytorch.py  # Core implementation
+│   ├── app_pytorch.py       # Flask dashboard
+│   ├── inference.py         # Model inference script
+│   ├── INFERENCE_GUIDE.md   # Inference documentation
+│   └── templates/           # Web UI
+│       └── index_pytorch.html
+│
+├── input.txt            # Shared training data
+├── requirements.txt     # Dependencies
+└── README.md           # This file
+```
+
+---
+
+## 🐍 Pure Python Version (CPU-Only)
 **Educational focus:** Understand backpropagation and autograd from scratch
 
 ### Features:
@@ -13,11 +38,13 @@ Two complete implementations of GPT for learning and comparison:
 
 ### Run:
 ```bash
+cd python-cpu
 python microgpt.py
 ```
 
 ### Web Dashboard:
 ```bash
+cd python-cpu
 python app.py
 # Visit: http://localhost:5000
 ```
@@ -33,14 +60,17 @@ python app.py
 - ✅ Automatic differentiation via PyTorch
 - ✅ Efficient matrix operations
 - ✅ Model saving/loading
+- ✅ Built-in inference UI
 
 ### Run:
 ```bash
+cd pytorch-gpu
 python microgpt_pytorch.py
 ```
 
 ### Web Dashboard:
 ```bash
+cd pytorch-gpu
 python app_pytorch.py
 # Visit: http://localhost:5001
 ```
